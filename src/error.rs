@@ -1,9 +1,17 @@
 #[derive(Debug)]
-pub enum Error {}
+pub enum Error {
+    ParseThoughtId(String),
+}
 
 impl std::fmt::Display for Error {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "error")?;
+        match self {
+            Error::ParseThoughtId(invalid_thought_id) => write!(
+                f,
+                "failed to parse '{}' as a thought id.",
+                invalid_thought_id
+            )?,
+        }
 
         Ok(())
     }
