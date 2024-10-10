@@ -1,6 +1,11 @@
 [package]
 name = "thought"
 version = "0.1.0"
+description = "Save your thoughts for later."
+license = "MIT"
+documentation = "https://docs.rs/thought"
+homepage = "https://github.com/silvasch/thought"
+repository = "https://github.com/silvasch/thought"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
