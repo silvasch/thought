@@ -1,6 +1,6 @@
 [package]
 name = "thought"
-version = "0.1.0"
+version = "1.0.0"
 description = "Save your thoughts for later."
 license = "MIT"
 documentation = "https://docs.rs/thought"
