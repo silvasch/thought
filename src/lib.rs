@@ -13,6 +13,9 @@ pub(crate) use thought_id::ThoughtId;
 mod thought_manager;
 pub(crate) use thought_manager::ThoughtManager;
 
+mod truncate;
+pub(crate) use truncate::Truncate;
+
 mod words;
 pub(crate) use words::WORDS;
 
@@ -54,10 +57,20 @@ fn new_thought(thought_manager: ThoughtManager) -> Result<(), Error> {
 
 fn list_thoughts(thought_manager: ThoughtManager) -> Result<(), Error> {
     for thought_id in thought_manager.get_thought_ids()? {
+        let thought_path = thought_manager.get_thought_path(&thought_id);
+        let thought_contents = std::fs::read_to_string(thought_path)
+            .map_err(|_| todo!())?
+            .trim()
+            .to_string();
+        let thought_contents_first_line = thought_contents.lines().next().unwrap_or("");
+
         println!(
-            "{} ({})",
+            "{} ({}) {}",
             thought_id.get_user_thought_id(),
             thought_id.date_time.format("%Y-%m-%d"),
+            thought_contents_first_line
+                .to_string()
+                .truncate(term_size::dimensions().unwrap_or((30 + 25, 0)).0 - 25),
         );
     }
 
