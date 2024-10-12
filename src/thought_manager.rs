@@ -18,7 +18,7 @@ impl ThoughtManager {
 
         let thought_path = self
             .base_dirs
-            .place_data_file(format!("{}.md", thought_id))
+            .place_data_file(format!("thoughts/{}.md", thought_id))
             .map_err(|_| todo!())?;
 
         std::fs::write(thought_path, "").map_err(|_| todo!())?;
@@ -27,7 +27,8 @@ impl ThoughtManager {
     }
 
     pub fn get_thought_path(&self, thought_id: &ThoughtId) -> PathBuf {
-        self.base_dirs.get_data_file(format!("{}.md", thought_id))
+        self.base_dirs
+            .get_data_file(format!("thoughts/{}.md", thought_id))
     }
 
     pub fn find_thought(&self, user_thought_id: &str) -> Result<Option<ThoughtId>, Error> {
@@ -43,14 +44,24 @@ impl ThoughtManager {
     pub fn get_thought_ids(&self) -> Result<Vec<ThoughtId>, Error> {
         let mut thought_ids = vec![];
 
-        for file_path in std::fs::read_dir(self.base_dirs.get_data_home()).map_err(|_| {
-            Error::ListThoughtsDir {
-                path: self.base_dirs.get_data_home().to_string_lossy().to_string(),
-            }
-        })? {
+        for file_path in std::fs::read_dir(self.base_dirs.get_data_home().join("thoughts"))
+            .map_err(|_| Error::ListThoughtsDir {
+                path: self
+                    .base_dirs
+                    .get_data_home()
+                    .join("thoughts")
+                    .to_string_lossy()
+                    .to_string(),
+            })?
+        {
             let file_path: PathBuf = file_path
                 .map_err(|_| Error::ListThoughtsDir {
-                    path: self.base_dirs.get_data_home().to_string_lossy().to_string(),
+                    path: self
+                        .base_dirs
+                        .get_data_home()
+                        .join("thoughts")
+                        .to_string_lossy()
+                        .to_string(),
                 })?
                 .path();
 
