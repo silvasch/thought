@@ -30,9 +30,28 @@ pub fn run() -> Result<(), Error> {
             for thought_id in thought_manager.get_thought_ids()? {
                 println!(
                     "{} ({})",
-                    thought_id.get_user_id(),
+                    thought_id.get_user_thought_id(),
                     thought_id.date_time.format("%Y-%m-%d"),
                 );
+            }
+        }
+        Some(("edit", matches)) => {
+            let user_thought_id = matches
+                .get_one::<String>("id")
+                .expect("argument is required");
+
+            let mut found_thought = false;
+
+            for thought_id in thought_manager.get_thought_ids()? {
+                if &thought_id.get_user_thought_id() == user_thought_id {
+                    EditorWrapper::new().edit(thought_manager.get_thought_path(&thought_id))?;
+                    found_thought = true;
+                    break;
+                }
+            }
+
+            if !found_thought {
+                eprintln!("That thought does not exist.");
             }
         }
         _ => unreachable!(),

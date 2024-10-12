@@ -27,7 +27,7 @@ impl ThoughtId {
         }
     }
 
-    pub fn get_user_id(&self) -> String {
+    pub fn get_user_thought_id(&self) -> String {
         format!("{}-{}", self.first_word, self.second_word)
     }
 }

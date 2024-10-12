@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use crate::{Error, ThoughtId};
 
@@ -22,6 +22,10 @@ impl ThoughtManager {
             .map_err(|_| todo!())?;
 
         Ok(thought_path)
+    }
+
+    pub fn get_thought_path(&self, thought_id: &ThoughtId) -> PathBuf {
+        self.base_dirs.get_data_file(format!("{}.md", thought_id))
     }
 
     pub fn get_thought_ids(&self) -> Result<Vec<ThoughtId>, Error> {
