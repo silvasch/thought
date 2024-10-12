@@ -13,7 +13,7 @@ impl ThoughtManager {
         })
     }
 
-    pub fn create_thought(&self) -> Result<PathBuf, Error> {
+    pub fn create_thought(&self) -> Result<ThoughtId, Error> {
         let thought_id = ThoughtId::new();
 
         let thought_path = self
@@ -21,7 +21,9 @@ impl ThoughtManager {
             .place_data_file(format!("{}.md", thought_id))
             .map_err(|_| todo!())?;
 
-        Ok(thought_path)
+        std::fs::write(thought_path, "").map_err(|_| todo!())?;
+
+        Ok(thought_id)
     }
 
     pub fn get_thought_path(&self, thought_id: &ThoughtId) -> PathBuf {

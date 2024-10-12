@@ -43,8 +43,10 @@ pub fn run() -> Result<(), Error> {
 }
 
 fn new_thought(thought_manager: ThoughtManager) -> Result<(), Error> {
-    let thought_path = thought_manager.create_thought()?;
+    let thought_id = thought_manager.create_thought()?;
+    let thought_path = thought_manager.get_thought_path(&thought_id);
     EditorWrapper::new().edit(thought_path)?;
+    println!("Created thought '{}'.", thought_id.get_user_thought_id());
     Ok(())
 }
 
@@ -64,7 +66,8 @@ fn edit_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Resul
     match thought_manager.find_thought(user_thought_id)? {
         Some(thought_id) => {
             let thought_path = thought_manager.get_thought_path(&thought_id);
-            EditorWrapper::new().edit(thought_path)?
+            EditorWrapper::new().edit(thought_path)?;
+            println!("Edited thought '{}'.", thought_id.get_user_thought_id());
         }
         None => eprintln!("That thought does not exist."),
     }
@@ -77,6 +80,7 @@ fn remove_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Res
         Some(thought_id) => {
             let thought_path = thought_manager.get_thought_path(&thought_id);
             std::fs::remove_file(thought_path).map_err(|_| todo!())?;
+            println!("Removed thought '{}'.", thought_id.get_user_thought_id());
         }
         None => eprintln!("That thought does not exist."),
     }
