@@ -28,6 +28,16 @@ impl ThoughtManager {
         self.base_dirs.get_data_file(format!("{}.md", thought_id))
     }
 
+    pub fn find_thought(&self, user_thought_id: &str) -> Result<Option<ThoughtId>, Error> {
+        for thought_id in self.get_thought_ids()? {
+            if thought_id.get_user_thought_id() == user_thought_id {
+                return Ok(Some(thought_id));
+            }
+        }
+
+        Ok(None)
+    }
+
     pub fn get_thought_ids(&self) -> Result<Vec<ThoughtId>, Error> {
         let mut thought_ids = vec![];
 

@@ -22,39 +22,63 @@ pub fn run() -> Result<(), Error> {
     let matches = get_cli().get_matches();
 
     match matches.subcommand() {
-        Some(("new", _)) | None => {
-            let thought_path = thought_manager.create_thought()?;
-            EditorWrapper::new().edit(thought_path)?;
-        }
-        Some(("list", _)) => {
-            for thought_id in thought_manager.get_thought_ids()? {
-                println!(
-                    "{} ({})",
-                    thought_id.get_user_thought_id(),
-                    thought_id.date_time.format("%Y-%m-%d"),
-                );
-            }
-        }
+        Some(("new", _)) | None => new_thought(thought_manager),
+        Some(("list", _)) => list_thoughts(thought_manager),
         Some(("edit", matches)) => {
             let user_thought_id = matches
                 .get_one::<String>("id")
                 .expect("argument is required");
 
-            let mut found_thought = false;
+            edit_thought(thought_manager, user_thought_id)
+        }
+        Some(("remove", matches)) => {
+            let user_thought_id = matches
+                .get_one::<String>("id")
+                .expect("argument is required");
 
-            for thought_id in thought_manager.get_thought_ids()? {
-                if &thought_id.get_user_thought_id() == user_thought_id {
-                    EditorWrapper::new().edit(thought_manager.get_thought_path(&thought_id))?;
-                    found_thought = true;
-                    break;
-                }
-            }
-
-            if !found_thought {
-                eprintln!("That thought does not exist.");
-            }
+            remove_thought(thought_manager, user_thought_id)
         }
         _ => unreachable!(),
+    }
+}
+
+fn new_thought(thought_manager: ThoughtManager) -> Result<(), Error> {
+    let thought_path = thought_manager.create_thought()?;
+    EditorWrapper::new().edit(thought_path)?;
+    Ok(())
+}
+
+fn list_thoughts(thought_manager: ThoughtManager) -> Result<(), Error> {
+    for thought_id in thought_manager.get_thought_ids()? {
+        println!(
+            "{} ({})",
+            thought_id.get_user_thought_id(),
+            thought_id.date_time.format("%Y-%m-%d"),
+        );
+    }
+
+    Ok(())
+}
+
+fn edit_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Result<(), Error> {
+    match thought_manager.find_thought(user_thought_id)? {
+        Some(thought_id) => {
+            let thought_path = thought_manager.get_thought_path(&thought_id);
+            EditorWrapper::new().edit(thought_path)?
+        }
+        None => eprintln!("That thought does not exist."),
+    }
+
+    Ok(())
+}
+
+fn remove_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Result<(), Error> {
+    match thought_manager.find_thought(user_thought_id)? {
+        Some(thought_id) => {
+            let thought_path = thought_manager.get_thought_path(&thought_id);
+            std::fs::remove_file(thought_path).map_err(|_| todo!())?;
+        }
+        None => eprintln!("That thought does not exist."),
     }
 
     Ok(())

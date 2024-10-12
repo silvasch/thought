@@ -11,4 +11,9 @@ pub fn get_cli() -> Command {
                 .about("Edit a thought.")
                 .arg(Arg::new("id").required(true).help("The id of the thought.")),
         )
+        .subcommand(
+            Command::new("remove")
+                .alias("rm")
+                .arg(Arg::new("id").required(true).help("The id of the thought.")),
+        )
 }
