@@ -1,4 +1,4 @@
-use clap::{Arg, Command};
+use clap::{Arg, ArgAction, Command};
 
 pub fn get_cli() -> Command {
     Command::new("thought")
@@ -8,12 +8,18 @@ pub fn get_cli() -> Command {
         .subcommand(Command::new("list").about("List your thoughts."))
         .subcommand(
             Command::new("edit")
-                .about("Edit a thought.")
-                .arg(Arg::new("id").required(true).help("The id of the thought.")),
+                .arg(Arg::new("id").required(true).help("The id of the thought."))
+                .about("Edit a thought."),
         )
         .subcommand(
             Command::new("remove")
                 .alias("rm")
-                .arg(Arg::new("id").required(true).help("The id of the thought.")),
+                .arg(
+                    Arg::new("id")
+                        .action(ArgAction::Append)
+                        .required(true)
+                        .help("The id of the thought."),
+                )
+                .about("Remove thoughts."),
         )
 }

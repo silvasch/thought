@@ -32,11 +32,13 @@ pub fn run() -> Result<(), Error> {
             edit_thought(thought_manager, user_thought_id)
         }
         Some(("remove", matches)) => {
-            let user_thought_id = matches
-                .get_one::<String>("id")
-                .expect("argument is required");
+            let user_thought_ids = matches
+                .get_many::<String>("id")
+                .expect("argument is required")
+                .map(ToString::to_string)
+                .collect();
 
-            remove_thought(thought_manager, user_thought_id)
+            remove_thought(thought_manager, user_thought_ids)
         }
         _ => unreachable!(),
     }
@@ -75,14 +77,19 @@ fn edit_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Resul
     Ok(())
 }
 
-fn remove_thought(thought_manager: ThoughtManager, user_thought_id: &str) -> Result<(), Error> {
-    match thought_manager.find_thought(user_thought_id)? {
-        Some(thought_id) => {
-            let thought_path = thought_manager.get_thought_path(&thought_id);
-            std::fs::remove_file(thought_path).map_err(|_| todo!())?;
-            println!("Removed thought '{}'.", thought_id.get_user_thought_id());
+fn remove_thought(
+    thought_manager: ThoughtManager,
+    user_thought_ids: Vec<String>,
+) -> Result<(), Error> {
+    for user_thought_id in &user_thought_ids {
+        match thought_manager.find_thought(user_thought_id)? {
+            Some(thought_id) => {
+                let thought_path = thought_manager.get_thought_path(&thought_id);
+                std::fs::remove_file(thought_path).map_err(|_| todo!())?;
+                println!("Removed thought '{}'.", thought_id.get_user_thought_id());
+            }
+            None => eprintln!("The thought '{}' does not exist.", user_thought_id),
         }
-        None => eprintln!("That thought does not exist."),
     }
 
     Ok(())
