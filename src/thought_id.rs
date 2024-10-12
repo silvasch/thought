@@ -26,6 +26,10 @@ impl ThoughtId {
             second_word,
         }
     }
+
+    pub fn get_user_id(&self) -> String {
+        format!("{}-{}", self.first_word, self.second_word)
+    }
 }
 
 impl std::fmt::Display for ThoughtId {
@@ -47,7 +51,9 @@ impl FromStr for ThoughtId {
         let split: Vec<&str> = value.split('-').collect();
 
         if split.len() != 3 {
-            return Err(Error::ParseThoughtId(value.to_string()));
+            return Err(Error::ParseThoughtId {
+                invalid_thought_id: value.to_string(),
+            });
         }
 
         let raw_timestamp = split.first().unwrap();
@@ -57,10 +63,14 @@ impl FromStr for ThoughtId {
         let date_time = DateTime::from_timestamp(
             raw_timestamp
                 .parse::<i64>()
-                .map_err(|_| Error::ParseThoughtId(value.to_string()))?,
+                .map_err(|_| Error::ParseThoughtId {
+                    invalid_thought_id: value.to_string(),
+                })?,
             0,
         )
-        .ok_or(Error::ParseThoughtId(value.to_string()))?;
+        .ok_or(Error::ParseThoughtId {
+            invalid_thought_id: value.to_string(),
+        })?;
 
         let first_word = raw_first_word.to_string();
 
