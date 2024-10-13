@@ -16,6 +16,9 @@ pub(crate) use thought_collection::ThoughtCollection;
 mod thought_id;
 pub(crate) use thought_id::ThoughtId;
 
+mod truncate;
+pub(crate) use truncate::Truncate;
+
 mod words;
 pub(crate) use words::WORDS;
 

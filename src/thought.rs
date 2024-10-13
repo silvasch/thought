@@ -2,7 +2,7 @@ use std::path::{Path, PathBuf};
 
 use chrono::{DateTime, Utc};
 
-use crate::{EditorWrapper, Error, ThoughtId};
+use crate::{EditorWrapper, Error, ThoughtId, Truncate};
 
 #[derive(Clone, Debug)]
 pub struct Thought {
@@ -92,11 +92,22 @@ impl Thought {
 
 impl std::fmt::Display for Thought {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let thought_content = self
+            .get_content()
+            .unwrap_or("".to_string())
+            .trim()
+            .lines()
+            .next()
+            .unwrap_or("")
+            .to_string()
+            .truncate_with_ellipsis(40);
+
         write!(
             f,
-            "{} ({})",
+            "{} ({}) {}",
             self.thought_id,
-            self.date_time.naive_local().format("%Y-%m-%d")
+            self.date_time.naive_local().format("%Y-%m-%d"),
+            thought_content,
         )
     }
 }
