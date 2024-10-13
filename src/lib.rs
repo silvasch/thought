@@ -40,6 +40,7 @@ pub fn run() -> Result<(), Error> {
             let thought = Thought::new(&thoughts_dir_path)?;
             thought.edit(EditorWrapper)?;
             state.last_accessed_thought_id = Some(thought.id().to_string());
+            println!("Created note '{}'.", thought.id());
         }
         Some(("list", _)) => {
             for thought in thought_collection.thoughts() {
@@ -61,6 +62,7 @@ pub fn run() -> Result<(), Error> {
             thought.edit(EditorWrapper)?;
 
             state.last_accessed_thought_id = Some(thought.id().to_string());
+            println!("Edited note '{}'.", thought.id());
         }
         Some(("delete", matches)) => {
             let raw_thought_ids = if matches.get_flag("last") {
@@ -81,8 +83,17 @@ pub fn run() -> Result<(), Error> {
                         continue;
                     }
                 };
+
                 let thought = thought_collection.find(&thought_id)?;
                 thought.delete()?;
+
+                if let Some(ref last_accessed_thought_id) = state.last_accessed_thought_id {
+                    if last_accessed_thought_id == &thought.id().to_string() {
+                        state.last_accessed_thought_id = None;
+                    }
+                }
+
+                println!("Deleted note '{}'.", thought.id());
             }
         }
         Some(("search", matches)) => {
