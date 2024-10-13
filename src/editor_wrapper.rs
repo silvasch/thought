@@ -13,7 +13,7 @@ impl EditorWrapper {
         let _ = std::process::Command::new(editor_command)
             .arg(file_path)
             .status()
-            .map_err(|_| todo!())?;
+            .map_err(|_| Error::ExecuteEditor)?;
 
         Ok(())
     }

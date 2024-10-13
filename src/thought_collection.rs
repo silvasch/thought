@@ -20,7 +20,9 @@ impl ThoughtCollection {
             }
         }
 
-        todo!()
+        Err(Error::ThoughtNotFound {
+            thought_id: thought_id.to_string(),
+        })
     }
 
     pub fn thoughts(&self) -> &Vec<Thought> {
@@ -30,9 +32,9 @@ impl ThoughtCollection {
     fn get_thoughts<P: AsRef<Path>>(thoughts_dir: P) -> Result<Vec<Thought>, Error> {
         let mut thoughts = vec![];
 
-        for file_path in std::fs::read_dir(thoughts_dir).unwrap() {
-            let file_path = file_path.unwrap().path();
-            thoughts.push(Thought::from_file_path(file_path).unwrap());
+        for file_path in std::fs::read_dir(thoughts_dir).map_err(|_| Error::ListThoughts)? {
+            let file_path = file_path.map_err(|_| Error::ListThoughts)?.path();
+            thoughts.push(Thought::from_file_path(file_path)?);
         }
 
         Ok(thoughts)

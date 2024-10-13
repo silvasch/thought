@@ -46,9 +46,24 @@ impl Thought {
             .to_string();
 
         let mut split = file_stem.splitn(2, '-');
-        let date_time =
-            DateTime::from_timestamp(split.next().unwrap().parse().unwrap(), 0).unwrap();
-        let thought_id = split.next().unwrap().parse().unwrap();
+        let raw_timestamp = split.next().ok_or(Error::ParseThoughtFromPath {
+            thought_path: file_path.to_string_lossy().to_string(),
+        })?;
+        let date_time = DateTime::from_timestamp(
+            raw_timestamp.parse().map_err(|_| Error::ParseTimestamp {
+                invalid_timestamp: raw_timestamp.to_string(),
+            })?,
+            0,
+        )
+        .ok_or(Error::ParseTimestamp {
+            invalid_timestamp: raw_timestamp.to_string(),
+        })?;
+        let thought_id = split
+            .next()
+            .ok_or(Error::ParseThoughtFromPath {
+                thought_path: file_path.to_string_lossy().to_string(),
+            })?
+            .parse()?;
 
         Ok(Self {
             thought_id,
@@ -62,7 +77,7 @@ impl Thought {
     }
 
     pub fn delete(&self) -> Result<(), Error> {
-        std::fs::remove_file(&self.file_path).unwrap();
+        std::fs::remove_file(&self.file_path).map_err(|_| Error::RemoveThought)?;
         Ok(())
     }
 

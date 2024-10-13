@@ -20,7 +20,7 @@ mod words;
 pub(crate) use words::WORDS;
 
 pub fn run() -> Result<(), Error> {
-    let base_dirs = xdg::BaseDirectories::with_prefix("thought").unwrap();
+    let base_dirs = xdg::BaseDirectories::with_prefix("thought")?;
     let thoughts_dir = base_dirs.get_data_home().join("thoughts");
     let thought_collection = ThoughtCollection::new(&thoughts_dir)?;
 
@@ -32,19 +32,21 @@ pub fn run() -> Result<(), Error> {
             }
         }
         Some(("edit", matches)) => {
-            let thought_id: ThoughtId = matches.get_one::<String>("id").unwrap().parse().unwrap();
+            let thought_id: ThoughtId = matches
+                .get_one::<String>("id")
+                .expect("argument is required")
+                .parse()?;
             let thought = thought_collection.find(&thought_id)?;
             thought.edit(EditorWrapper)?;
         }
         Some(("delete", matches)) => {
-            let thought_ids: Vec<ThoughtId> = matches
+            let thought_ids: Vec<&String> = matches
                 .get_many::<String>("ids")
-                .unwrap()
-                .map(|v| v.parse().unwrap())
+                .expect("ids is required")
                 .collect();
 
             for thought_id in thought_ids {
-                let thought = match thought_collection.find(&thought_id) {
+                let thought = match thought_collection.find(&thought_id.parse()?) {
                     Ok(thought) => thought,
                     Err(e) => {
                         eprintln!("{}", e);
