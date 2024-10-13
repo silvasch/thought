@@ -26,8 +26,14 @@ pub fn get_cli() -> Command {
                 .arg(
                     Arg::new("ids")
                         .action(ArgAction::Append)
-                        .required(true)
+                        .required_unless_present("last")
                         .help("The ids of the thoughts."),
+                )
+                .arg(
+                    Arg::new("last")
+                        .long("last")
+                        .action(ArgAction::SetTrue)
+                        .help("Delete the last accessed note."),
                 )
                 .about("Remove thoughts"),
         )

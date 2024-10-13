@@ -63,19 +63,25 @@ pub fn run() -> Result<(), Error> {
             state.last_accessed_thought_id = Some(thought.id().to_string());
         }
         Some(("delete", matches)) => {
-            let thought_ids: Vec<&String> = matches
-                .get_many::<String>("ids")
-                .expect("ids is required")
-                .collect();
+            let raw_thought_ids = if matches.get_flag("last") {
+                vec![state.last_accessed_thought_id.clone().unwrap()]
+            } else {
+                matches
+                    .get_many::<String>("ids")
+                    .expect("id is required")
+                    .map(ToString::to_string)
+                    .collect()
+            };
 
-            for thought_id in thought_ids {
-                let thought = match thought_collection.find(&thought_id.parse()?) {
-                    Ok(thought) => thought,
+            for raw_thought_id in raw_thought_ids {
+                let thought_id: ThoughtId = match raw_thought_id.parse() {
+                    Ok(thought_id) => thought_id,
                     Err(e) => {
                         eprintln!("{}", e);
                         continue;
                     }
                 };
+                let thought = thought_collection.find(&thought_id)?;
                 thought.delete()?;
             }
         }
