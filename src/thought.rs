@@ -72,6 +72,10 @@ impl Thought {
         })
     }
 
+    pub fn get_content(&self) -> Result<String, Error> {
+        Ok(std::fs::read_to_string(&self.file_path).unwrap())
+    }
+
     pub fn edit(&self, editor_wrapper: EditorWrapper) -> Result<(), Error> {
         editor_wrapper.edit(&self.file_path)
     }

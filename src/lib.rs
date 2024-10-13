@@ -34,7 +34,7 @@ pub fn run() -> Result<(), Error> {
         Some(("edit", matches)) => {
             let thought_id: ThoughtId = matches
                 .get_one::<String>("id")
-                .expect("argument is required")
+                .expect("id is required")
                 .parse()?;
             let thought = thought_collection.find(&thought_id)?;
             thought.edit(EditorWrapper)?;
@@ -54,6 +54,24 @@ pub fn run() -> Result<(), Error> {
                     }
                 };
                 thought.delete()?;
+            }
+        }
+        Some(("search", matches)) => {
+            let pattern = matches
+                .get_one::<String>("pattern")
+                .expect("pattern is required");
+
+            let mut matching_thoughts = vec![];
+
+            for thought in thought_collection.thoughts() {
+                let thought_content = thought.get_content()?;
+                if thought_content.to_lowercase().contains(pattern) {
+                    matching_thoughts.push(thought.clone());
+                }
+            }
+
+            for thought in matching_thoughts {
+                println!("{}", thought);
             }
         }
         _ => unreachable!(),

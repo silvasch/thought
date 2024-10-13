@@ -17,8 +17,17 @@ pub fn get_cli() -> Command {
                     Arg::new("ids")
                         .action(ArgAction::Append)
                         .required(true)
-                        .help("The ids of the thoughts"),
+                        .help("The ids of the thoughts."),
                 )
                 .about("Remove thoughts"),
+        )
+        .subcommand(
+            Command::new("search")
+                .arg(
+                    Arg::new("pattern")
+                        .required(true)
+                        .help("The pattern to search for."),
+                )
+                .about("Search your thoughts."),
         )
 }
