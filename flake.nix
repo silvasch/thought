@@ -25,7 +25,7 @@
         in {
           default = toolchain.buildRustPackage {
             pname = "thought";
-            version = "1.0.1";
+            version = "2.0.0";
             src = ./.;
             cargoLock.lockFile = ./Cargo.lock;
           };
