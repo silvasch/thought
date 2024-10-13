@@ -4,7 +4,7 @@ use chrono::{DateTime, Utc};
 
 use crate::{EditorWrapper, Error, ThoughtId};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Thought {
     thought_id: ThoughtId,
     date_time: DateTime<Utc>,

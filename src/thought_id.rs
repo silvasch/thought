@@ -4,7 +4,7 @@ use rand::{seq::SliceRandom, thread_rng};
 
 use crate::WORDS;
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ThoughtId {
     first_word: String,
     second_word: String,
