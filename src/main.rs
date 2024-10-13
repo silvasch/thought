@@ -1,3 +1,5 @@
 fn main() {
-    println!("Hello, World!");
+    if let Err(e) = thought::run() {
+        eprintln!("{}", e);
+    }
 }

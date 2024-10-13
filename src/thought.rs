@@ -1,0 +1,83 @@
+use std::path::{Path, PathBuf};
+
+use chrono::{DateTime, Utc};
+
+use crate::{EditorWrapper, Error, ThoughtId};
+
+#[derive(Debug)]
+pub struct Thought {
+    thought_id: ThoughtId,
+    date_time: DateTime<Utc>,
+    file_path: PathBuf,
+}
+
+impl Thought {
+    pub fn new<P: AsRef<Path>>(thoughts_dir: P) -> Result<Self, Error> {
+        let thoughts_dir = thoughts_dir.as_ref().to_path_buf();
+        if thoughts_dir.is_file() {
+            return Err(Error::ThoughtsPathIsFile {
+                invalid_thoughts_dir: thoughts_dir.to_string_lossy().to_string(),
+            });
+        }
+
+        let thought_id = ThoughtId::new();
+        let date_time = Utc::now();
+        let file_path = thoughts_dir.join(format!("{}-{}.md", date_time.timestamp(), thought_id));
+
+        Ok(Self {
+            thought_id,
+            date_time,
+            file_path,
+        })
+    }
+
+    pub fn from_file_path<P: AsRef<Path>>(file_path: P) -> Result<Self, Error> {
+        let file_path = file_path.as_ref().to_path_buf();
+        if file_path.is_dir() {
+            return Err(Error::ThoughtPathIsDir {
+                invalid_thought_path: file_path.to_string_lossy().to_string(),
+            });
+        }
+
+        let file_stem = file_path
+            .file_stem()
+            .expect("file should always have a name")
+            .to_string_lossy()
+            .to_string();
+
+        let mut split = file_stem.splitn(2, '-');
+        let date_time =
+            DateTime::from_timestamp(split.next().unwrap().parse().unwrap(), 0).unwrap();
+        let thought_id = split.next().unwrap().parse().unwrap();
+
+        Ok(Self {
+            thought_id,
+            date_time,
+            file_path,
+        })
+    }
+
+    pub fn edit(&self, editor_wrapper: EditorWrapper) -> Result<(), Error> {
+        editor_wrapper.edit(&self.file_path)
+    }
+
+    pub fn delete(&self) -> Result<(), Error> {
+        std::fs::remove_file(&self.file_path).unwrap();
+        Ok(())
+    }
+
+    pub fn id(&self) -> &ThoughtId {
+        &self.thought_id
+    }
+}
+
+impl std::fmt::Display for Thought {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{} ({})",
+            self.thought_id,
+            self.date_time.naive_local().format("%Y-%m-%d")
+        )
+    }
+}
