@@ -7,6 +7,9 @@ pub(crate) use editor_wrapper::EditorWrapper;
 mod error;
 pub(crate) use error::Error;
 
+mod state;
+pub(crate) use state::State;
+
 mod thought;
 pub(crate) use thought::Thought;
 
@@ -24,11 +27,20 @@ pub(crate) use words::WORDS;
 
 pub fn run() -> Result<(), Error> {
     let base_dirs = xdg::BaseDirectories::with_prefix("thought")?;
-    let thoughts_dir = base_dirs.get_data_home().join("thoughts");
-    let thought_collection = ThoughtCollection::new(&thoughts_dir)?;
+
+    let thoughts_dir_path = base_dirs.get_data_home().join("thoughts");
+    let thought_collection = ThoughtCollection::new(&thoughts_dir_path)?;
+
+    let state_file_path = base_dirs.place_data_file("state.toml").unwrap();
+    let raw_state = std::fs::read_to_string(&state_file_path).unwrap_or("".to_string());
+    let mut state: State = toml::from_str(&raw_state).unwrap();
 
     match get_cli().get_matches().subcommand() {
-        Some(("new", _)) => Thought::new(&thoughts_dir)?.edit(EditorWrapper)?,
+        Some(("new", _)) => {
+            let thought = Thought::new(&thoughts_dir_path)?;
+            thought.edit(EditorWrapper)?;
+            state.last_accessed_thought_id = Some(thought.id().to_string());
+        }
         Some(("list", _)) => {
             for thought in thought_collection.thoughts() {
                 println!("{}", thought);
@@ -36,7 +48,7 @@ pub fn run() -> Result<(), Error> {
         }
         Some(("edit", matches)) => {
             let raw_thought_id = if matches.get_flag("last") {
-                "test".to_string()
+                state.last_accessed_thought_id.unwrap()
             } else {
                 matches
                     .get_one::<String>("id")
@@ -47,6 +59,8 @@ pub fn run() -> Result<(), Error> {
 
             let thought = thought_collection.find(&thought_id)?;
             thought.edit(EditorWrapper)?;
+
+            state.last_accessed_thought_id = Some(thought.id().to_string());
         }
         Some(("delete", matches)) => {
             let thought_ids: Vec<&String> = matches
@@ -85,6 +99,8 @@ pub fn run() -> Result<(), Error> {
         }
         _ => unreachable!(),
     }
+
+    std::fs::write(&state_file_path, toml::to_string(&state).unwrap()).unwrap();
 
     Ok(())
 }

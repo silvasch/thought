@@ -14,5 +14,7 @@ edition = "2021"
 chrono = "0.4.38"
 clap = "4.5.20"
 rand = "0.8.5"
+serde = { version = "1.0.210", features = ["derive"] }
 term_size = "0.3.2"
+toml = "0.8.19"
 xdg = "2.5.2"
