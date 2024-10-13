@@ -8,7 +8,17 @@ pub fn get_cli() -> Command {
         .subcommand(Command::new("list").about("List your thoughts."))
         .subcommand(
             Command::new("edit")
-                .arg(Arg::new("id").required(true).help("The id of the thought."))
+                .arg(
+                    Arg::new("id")
+                        .required_unless_present("last")
+                        .help("The id of the thought."),
+                )
+                .arg(
+                    Arg::new("last")
+                        .long("last")
+                        .action(ArgAction::SetTrue)
+                        .help("Edit the last accessed note."),
+                )
                 .about("Edit a thought."),
         )
         .subcommand(

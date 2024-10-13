@@ -35,10 +35,16 @@ pub fn run() -> Result<(), Error> {
             }
         }
         Some(("edit", matches)) => {
-            let thought_id: ThoughtId = matches
-                .get_one::<String>("id")
-                .expect("id is required")
-                .parse()?;
+            let raw_thought_id = if matches.get_flag("last") {
+                "test".to_string()
+            } else {
+                matches
+                    .get_one::<String>("id")
+                    .expect("id is required")
+                    .to_string()
+            };
+            let thought_id = raw_thought_id.parse()?;
+
             let thought = thought_collection.find(&thought_id)?;
             thought.edit(EditorWrapper)?;
         }
